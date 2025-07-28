@@ -1,22 +1,25 @@
-# Use an AMD64-compatible base image
-FROM --platform=linux/amd64 python:3.10-slim
+# Use a slim Python image
+FROM python:3.10-slim
+
+# Prevent writing .pyc files and enable unbuffered output
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
 
 # Set working directory
 WORKDIR /app
 
-# Install system dependencies (pdfplumber needs some)
+# Install required system packages
 RUN apt-get update && apt-get install -y \
     build-essential \
     poppler-utils \
+    tesseract-ocr \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy and install Python requirements
-COPY requirements.txt .
-RUN pip install --upgrade pip && \
-    pip install -r requirements.txt
+# Copy all files
+COPY . /app
 
-# Copy application code
-COPY . .
+# Install Python dependencies
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Default command (adjust if main.py needs arguments)
+# Default command to run your app
 CMD ["python", "main.py"]
